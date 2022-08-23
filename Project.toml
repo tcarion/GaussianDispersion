@@ -3,6 +3,10 @@ uuid = "7b7cc4e3-398b-4c6b-b3a7-b5804ff909e2"
 authors = ["tcarion <tristan.carion@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+
 [compat]
 julia = "1"
 

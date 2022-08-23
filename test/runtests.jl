@@ -1,6 +1,6 @@
 using GaussianDispersion
 using Test
 
-@testset "GaussianDispersion.jl" begin
-    # Write your tests here.
-end
+@testset "parameters" begin include("parameters.jl") end
+@testset "meteorology" begin include("meteorology.jl") end
+@testset "concentration" begin include("concentration.jl") end
