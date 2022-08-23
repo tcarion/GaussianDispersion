@@ -1,0 +1,3 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+GaussianDispersion = "7b7cc4e3-398b-4c6b-b3a7-b5804ff909e2"
