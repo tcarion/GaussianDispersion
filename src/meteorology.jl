@@ -102,3 +102,59 @@ height_hs(p, ps, R_gas, T, g) = -R_gas * T / g * log(p/ps)
 Get height from pressure level in the international standard atmosphere.
 """
 height_isa(p, R_gas, g) = height_hs(p, 101325, R_gas, 288, g)
+
+## Empirical parametrizations
+
+### Related to heat balance (≈ p.78)
+"""
+    $(TYPEDSIGNATURES)
+
+Solar radiation energy flux W m^-2 given the solar elevation `Φ` and `n` the fractional cloud cover.
+Ref: Kasten and Czeplak, 1980; Holtslag and van Ulden, 1983.
+"""
+solar_energy_flux(Φ, n) = (990 * sind(Φ) - 30) * (1 - 0.75 * n^3.4)
+
+"""
+    $(TYPEDSIGNATURES)
+
+Net radiation energy flux received by the earth surface [W m^-2] with `R` the solar flux ([`solar_energy_flux`](@ref))
+"""
+net_radiation(R, albedo, cloud_cover, T_surf) = ( R*(1-albedo) + 60 * cloud_cover - 5.67 * 1e-8 * T_surf^4 + 5.31e-13 * T_surf^6 ) / 1.12
+
+"""
+    $(TYPEDSIGNATURES)
+
+Sensible heat flux to the surface [W m^-2]. `net_rad` can be calculated with [`net_radiation`](@ref)
+"""
+sensible_heat_flux(C_g, net_rad, B) = (1 - C_g) * net_rad / (1 + 1 / B)
+
+"""
+    $(TYPEDSIGNATURES)
+
+Latitude [°] where the sun is in the zenith at the solar noon. `day` is the day of the year
+"""
+solar_declination(day) = 23.45 * cosd(360 * (day + 10) / 365.25)
+
+# The equation of the reference book (p.558) gives bad results
+# solar_declination(day) = 23.45 * sind(360 * (day - 284) / 365.25)
+
+"""
+    $(TYPEDSIGNATURES)
+
+`t` the time in hour and `t0` the time of the solar noon.
+"""
+hour_angle(t, t0 = 12) = 15 * (t - t0)
+
+"""
+    $(TYPEDSIGNATURES)
+
+Solar elevation [°] given the latitude, the solar declination and the hour angle.
+"""
+solar_elevation(lat, sol_dec, h_angle) = asind(sind(lat) * sind(sol_dec) + cosd(lat) * cosd(sol_dec) * cosd(h_angle))
+
+"""
+    $(TYPEDSIGNATURES)
+
+Albedo given `albedo_90` the albedo at 90° and `ϕ` the solar elevation
+"""
+albedo_elevation(albedo_90, ϕ) = albedo_90 + (1 - albedo_90) * exp(-0.1 * ϕ - 0.5 * (1 - albedo_90)^2)

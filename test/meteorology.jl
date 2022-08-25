@@ -5,7 +5,14 @@ using GaussianDispersion:
     friction_velocity,
     potential_temp,
     friction_temp,
-    obukhov
+    obukhov,
+    solar_energy_flux,
+    net_radiation,
+    sensible_heat_flux
+
+using Test
+
+const GD = GaussianDispersion
 
 @testset "scalar atmosphere properties" begin
     cp = 1004.5
@@ -35,4 +42,33 @@ using GaussianDispersion:
 
     L = obukhov(ps, t2, td2, t1, p1, u_star, q)
     @test L ≈ -37 atol = 1
+end
+
+@testset "heat balance" begin
+    
+    # Ex 5.4 p.79
+    n = 0.
+    solar_elev = 60.
+    terrain = Rural
+    albedo = 0.2
+    C_g = 0.1
+    B = 0.5
+    T_surf = 298.15
+    R = solar_energy_flux(solar_elev, n)
+    @test R ≈ 827.4 atol = 1e-1
+    R_N = net_radiation(R, albedo, n, T_surf)
+    @test R_N ≈ 524 atol = 1
+    q = sensible_heat_flux(C_g, R_N, B)
+    @test q ≈ 157.2 atol = 1
+    
+end
+
+@testset "solar elevation" begin
+    δ = GD.solar_declination(1)
+    lat = 52.
+    h = 15
+    ha = GD.hour_angle(15.84)
+    elev = GD.solar_elevation(lat, δ, ha)
+    @test elev ≈ 37.73 atol = 1e-2
+    @test GD.albedo_elevation(0.1, 30) ≈ 0.129 atol = 1e-2
 end
