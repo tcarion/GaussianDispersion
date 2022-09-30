@@ -86,7 +86,7 @@ Structure related to the release conditions
 
     $(FIELDS)
 """
-Base.@kwdef mutable struct GaussianDispersionParams
+Base.@kwdef mutable struct GaussianPlume
     "release parameters"
     release::ReleaseParams = ReleaseParams()
     "terrain (Urban/Rural)"
@@ -98,7 +98,7 @@ Base.@kwdef mutable struct GaussianDispersionParams
     "height of the mixing layer"
     hmix::Union{Real, Nothing} = nothing
 end
-GaussianDispersionParams(release::ReleaseParams, terrain::AbstractTerrain, criteria::PasquillGiffordCriteria) = GaussianDispersionParams(release, terrain, pasquill_gifford(criteria, release.u))
+GaussianPlume(release::ReleaseParams, terrain::AbstractTerrain, criteria::PasquillGiffordCriteria) = GaussianPlume(release, terrain, pasquill_gifford(criteria, release.u))
 
 """
     $(TYPEDSIGNATURES)
@@ -107,7 +107,7 @@ Return the concentration in [g m^{-3}] at some point given the conditions stated
 - `y` is the horizontal distance perpendicular to the wind.
 - `z` is the vertical distance from the point source.
 """
-(plume::GaussianDispersionParams)(x::Real, y::Real, z::Real) = concentration(x, y, z, plume.release, plume.terrain, plume.stabilities; reflection = plume.reflection)
+(plume::GaussianPlume)(x::Real, y::Real, z::Real) = concentration(x, y, z, plume.release, plume.terrain, plume.stabilities; reflection = plume.reflection)
 
 """
     $(SIGNATURES)
@@ -154,7 +154,7 @@ end
 # - `y` is the horizontal distance perpendicular to the wind.
 # - `z` is the vertical distance from the point source.
 # """
-# concentration(x::Real, y::Real, z::Real, params::GaussianDispersionParams) = 
+# concentration(x::Real, y::Real, z::Real, params::GaussianPlume) = 
 #     concentration(x, y, z, params.release, params.terrain, params.stabilities; reflection = params.reflection)
 
 function _destruct(p::ReleaseParams)

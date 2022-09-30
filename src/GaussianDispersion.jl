@@ -3,7 +3,7 @@ module GaussianDispersion
 using DocStringExtensions
 using Parameters: @unpack
 
-export ReleaseParams, DispersionParams, GaussianDispersionParams
+export ReleaseParams, DispersionParams, GaussianPlume
 export concentration, StabilityClass, Terrain, PasquillGiffordCriteria, pasquill_gifford
 export Rural, Urban
 # export A, B, C, D, E, F

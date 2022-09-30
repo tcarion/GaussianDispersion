@@ -7,7 +7,7 @@ using GaussianDispersion
     h = 75 + 15
     stabs = pasquill_gifford(Moderate, u)
     relpar = ReleaseParams(h = h, Q = 100, u = u)
-    plume = GaussianDispersionParams(release = relpar)
+    plume = GaussianPlume(release = relpar)
     plume.stabilities = stabs
     cground1 = plume(1500, 0, 0) * 1e6
     ccross = plume(1500, 100, 0) * 1e6
@@ -18,7 +18,7 @@ using GaussianDispersion
     h = 30
     relpar = ReleaseParams(h = h, Q = 5, u = 2)
 
-    plume = GaussianDispersionParams(release = relpar)
+    plume = GaussianPlume(release = relpar)
     
     plume.stabilities = Stabilities(:D)
     plume.reflection = true
@@ -44,7 +44,7 @@ end
 end
 
 @testset "concentration - multiple classes" begin
-    plume = GaussianDispersionParams()
+    plume = GaussianPlume()
     plume.stabilities = Stabilities(:A, :B)
     cboth= plume(1000, 0, 0)
 
