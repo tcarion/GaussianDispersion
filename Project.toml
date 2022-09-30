@@ -8,6 +8,7 @@ DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 
 [compat]
+Parameters = "0.12"
 DocStringExtensions = "0.9"
 julia = "1"
 
