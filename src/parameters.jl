@@ -138,8 +138,8 @@ Values for the heat balance parametrization.
 - `C_g`: parameter for the estimation of the heat flux to the ground in the equation ``q\\_G = C\\_G R\\_n``. 
 Typical values are `0.05-0.25` for rural, `0.25-0.3` for urban and `0.1` for grasslands (Scire et al., 2000)
 """
-Base.@kwdef struct HeatBalanceParams
-    C_g::Real
+Base.@kwdef mutable struct HeatBalanceParams
+    C_g::Real = 0.1
     albedo::Real = 0.18
     B::Real = 1.
 end
@@ -147,3 +147,23 @@ end
 HeatBalanceParams(::Type{Aermod}) = HeatBalanceParams(
     C_g = 0.1
 )
+
+HeatBalanceParams(::Type{Calpuff}, terrain::Type{<:AbstractTerrain}) = HeatBalanceParams(;
+    CALPUFF_HEAT_PARAMS[Symbol(terrain)]...
+)
+
+# p.78
+CALPUFF_HEAT_PARAMS = (
+    Urban       = (albedo = 0.18, B = 1.5),
+    Rural       = (albedo = 0.20, B = 1.0),
+    Irrigated   = (albedo = 0.15, B = 0.5),
+    Water       = (albedo = 0.10, B = 0.0),
+    Forest      = (albedo = 0.10, B = 1.0),
+)
+
+function sensible_heat_flux(hbp::HeatBalanceParams, cloud_cover, T_surf, sol_elev)
+    @unpack C_g, albedo, B = hbp
+    R = solar_energy_flux(sol_elev, cloud_cover)
+    net_rad = net_radiation(R, albedo, cloud_cover, T_surf)
+    sensible_heat_flux(C_g, net_rad, B)
+end

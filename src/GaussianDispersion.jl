@@ -18,9 +18,9 @@ const BRIGGS_COEFS = [
 
 const GRAVITY = 9.80665 
 
+include("meteorology.jl")
 include("parametrization.jl")
 include("parameters.jl")
-include("meteorology.jl")
 include("concentration.jl")
 
 end

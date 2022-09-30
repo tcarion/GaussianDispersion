@@ -17,5 +17,9 @@ end
     (0.14, 0.0003, -0.5)
     )
 
-@test HeatBalanceParams(Aermod) isa HeatBalanceParams
-@test HeatBalanceParams(C_g = 0.3) isa HeatBalanceParams
+@testset "heat balance params" begin
+    @test HeatBalanceParams(Aermod) isa HeatBalanceParams
+    @test HeatBalanceParams(C_g = 0.3) isa HeatBalanceParams
+
+    @test HeatBalanceParams(Calpuff, Urban).albedo == 0.18
+end
