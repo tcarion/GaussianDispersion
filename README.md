@@ -20,10 +20,9 @@ It's currently possible to run a simple Gaussian plume model with the Pasquill a
 ```julia
 using GaussianDispersion
 
-relpar = ReleaseParams(h = 12, Q = 100, u = 4)
-plume = GaussianPlume(release = relpar)
-plume.stabilities = Stabilities(:D)
-plume.reflection = true
+relparams = ReleaseParams(h = 12, Q = 100)
+meteoparams = MeteoParams(wind = 4, stability = PGStability(:D))
+plume = GaussianPlume(release = relparams, meteo = meteoparams)
 
 # Calculate the plume on a 3-D domain:
 result = [plume(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)]

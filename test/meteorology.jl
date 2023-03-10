@@ -10,9 +10,21 @@ using GaussianDispersion:
     net_radiation,
     sensible_heat_flux
 
+using GaussianDispersion: PGStabilityClass, PGStability
+using GaussianDispersion: PGSlightlyUnstable, PGNeutral
+using GaussianDispersion: AbstractStability
 using Test
 
 const GD = GaussianDispersion
+
+@testset "Pasquill Gifford stability classes" begin
+    pgstab = PGStability(:A)
+    @test pgstab isa AbstractStability
+
+    @test pasquill_gifford(Moderate(), 5.5) == Set([PGSlightlyUnstable(), PGNeutral()])
+end
+
+
 
 @testset "scalar atmosphere properties" begin
     cp = 1004.5

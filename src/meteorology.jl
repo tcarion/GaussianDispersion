@@ -1,3 +1,148 @@
+
+abstract type AbstractMeteoParams end
+
+abstract type AbstractSkyCondition end
+
+abstract type AbstractStability end
+
+"""
+    PGStabilityClass
+Abstract type of Pasquill-Gifford stability classes. The concrete types start with `PG` followed by the letter from Pasquill-Gifford classes (A, B, C, D, E, F).
+
+# Reference
+(Pasquill, 1961; Gifford, 1961).
+"""
+abstract type PGStabilityClass end
+
+struct PGVeryUnstable <: PGStabilityClass end
+struct PGUnstable <: PGStabilityClass end
+struct PGSlightlyUnstable <: PGStabilityClass end
+struct PGNeutral <: PGStabilityClass end
+struct PGSlightlyStable <: PGStabilityClass end
+struct PGStable <: PGStabilityClass end
+
+const MAP_PG_CLASSES = (
+    A = PGVeryUnstable(),
+    B = PGUnstable(),
+    C = PGSlightlyUnstable(),
+    D = PGNeutral(),
+    E = PGSlightlyStable(),
+    F = PGStable(),
+)
+
+"""
+    PGStability <: AbstractPGStability
+Define the stability classes for the model according to Pasquill and Gifford.
+#! If multiple classes are defined, the average result for each class is considered.
+
+# Example
+```jl-repl
+julia> pgstab = PGStability(:A)
+PGStability(GaussianDispersion.PGVeryUnstable())
+```
+"""
+struct PGStability <: AbstractStability
+    class::PGStabilityClass
+end
+
+PGStability(letter::Symbol) = PGStability(MAP_PG_CLASSES[letter])
+
+# function PGStability(classes::Vararg{Symbol})
+#     pgclasses = map(_symbol_to_pg, classes)
+#     PGStability(Set(pgclasses))
+# end
+
+# function _symbol_to_pg(s::Symbol)
+#     object_name = Meta.parse("PG$s")
+#     eval(:($object_name()))
+# end
+
+struct Strong <: AbstractSkyCondition end
+struct Moderate <: AbstractSkyCondition end
+struct Slight <: AbstractSkyCondition end
+struct Cloudy <: AbstractSkyCondition end
+struct Clear <: AbstractSkyCondition end
+
+"""
+    pasquill_gifford(criteria::AbstractSkyCondition, windspeed::Real)
+Return a list of stability classes according to the Pasquill Gifford criteria
+
+# Example
+julia> pasquill_gifford(Moderate, 5.5)
+Set{StabilityClass} with 2 elements:
+ C
+ D
+"""
+function pasquill_gifford(criteria::AbstractSkyCondition, windspeed::Real)
+    if windspeed < 2
+        if criteria == Strong()
+            Set([PGVeryUnstable()])
+        elseif criteria == Moderate()
+            Set([PGVeryUnstable(), PGUnstable()])
+        elseif criteria == Slight()
+            Set([PGUnstable()])
+        elseif criteria == Cloudy()
+            Set([PGSlightlyStable()])
+        elseif criteria == Clear()
+            Set([PGStable()])
+        end
+    elseif 2 <= windspeed < 3
+        if criteria == Strong()
+            Set([PGVeryUnstable(), PGUnstable()])
+        elseif criteria == Moderate()
+            Set([PGUnstable()])
+        elseif criteria == Slight()
+            Set([PGSlightlyUnstable()])
+        elseif criteria == Cloudy()
+            Set([PGSlightlyStable()])
+        elseif criteria == Clear()
+            Set([PGStable()])
+        end
+    elseif 3 <= windspeed < 5
+        if criteria == Strong()
+            Set([PGUnstable()])
+        elseif criteria == Moderate()
+            Set([PGUnstable(), PGSlightlyUnstable()])
+        elseif criteria == Slight()
+            Set([PGSlightlyUnstable()])
+        elseif criteria == Cloudy()
+            Set([PGNeutral()])
+        elseif criteria == Clear()
+            Set([PGSlightlyStable()])
+        end
+    elseif 5 <= windspeed <= 6
+        if criteria == Strong()
+            Set([PGSlightlyUnstable()])
+        elseif criteria == Moderate()
+            Set([PGSlightlyUnstable(), PGNeutral()])
+        elseif criteria == Slight()
+            Set([PGNeutral()])
+        elseif criteria == Cloudy()
+            Set([PGNeutral()])
+        elseif criteria == Clear()
+            Set([PGNeutral()])
+        end
+    else
+        if criteria == Strong()
+            Set([PGSlightlyUnstable()])
+        elseif criteria == Moderate()
+            Set([PGNeutral()])
+        elseif criteria == Slight()
+            Set([PGNeutral()])
+        elseif criteria == Cloudy()
+            Set([PGNeutral()])
+        elseif criteria == Clear()
+            Set([PGNeutral()])
+        end
+    end
+end
+Base.@kwdef struct MeteoParams{W, S, M} <: AbstractMeteoParams
+    wind::W = 5.
+    stability::S = PGStability(:A)
+    "height of the mixing layer [m]"
+    hmix::M = nothing
+end
+
 """
     $(TYPEDSIGNATURES)
 
