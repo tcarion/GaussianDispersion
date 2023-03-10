@@ -25,6 +25,9 @@ using GaussianDispersion
 
     cground2 = plume(1000, 0, 0)
     @test cground2 ≈ 201.139895390322 * 1e-6
+
+    # @btime result = [plume(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)]
+    # 5.746 s (129000005 allocations: 3.20 GiB)
 end
 
 # Example from reference book "Air Dispersion Modeling - Foundations and Applications, Alex De Visscher, p.31"
