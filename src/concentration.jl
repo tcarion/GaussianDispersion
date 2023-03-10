@@ -18,7 +18,7 @@ Base.@kwdef struct GaussianPlume{M, T}
     release::ReleaseParams = ReleaseParams()
     "terrain (Urban/Rural)"
     terrain::AbstractTerrain = Rural()
-    "set of stability classes"
+    "parameters related to the atmospheric conditions"
     meteo::M = MeteoParams()
     "object representing the dispersion coefficients"
     dispcoefs::T = BriggsFunctions(terrain, meteo.stability)

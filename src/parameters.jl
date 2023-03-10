@@ -114,7 +114,7 @@ sigma_y(relation::BriggsFunctions) = relation.σ_yx
 sigma_z(relation::BriggsFunctions) = relation.σ_zx
 
 
-_briggs_function(a, b, c) = x -> a * x * (1 + b*x)^c
+_briggs_function(a::T, b::T, c::T) where T = x -> a * x * (1 + b*x)^c
 
 DispersionCoefficients(briggs::BriggsFunctions, x) = DispersionCoefficients(briggs(x)...) 
 
