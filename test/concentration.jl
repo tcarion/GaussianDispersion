@@ -47,14 +47,18 @@ end
     @test Δh ≈ 47.589 atol=1e-3
 end
 
-# @testset "concentration - multiple classes" begin
-#     plume = GaussianPlume()
-#     plume.stabilities = Stabilities(:A, :B)
-#     cboth= plume(1000, 0, 0)
+@testset "concentration - multiple classes" begin
+    meteoparams = MeteoParams(
+        stability = [PGStability(:A), PGStability(:B)]
+    )
+    plumeboth = GaussianPlume(meteo = meteoparams)
+    cboth= plumeboth(1000, 0, 0)
 
-#     plume.stabilities = Stabilities(:A)
-#     ca= plume(1000, 0, 0)
+    plumeA = GaussianPlume(meteo = MeteoParams(stability = PGStability(:A)))
+    ca= plumeA(1000, 0, 0)
 
-#     plume.stabilities = Stabilities(:B)
-#     cb= plume(1000, 0, 0)
-# end
+    plumeB = GaussianPlume(meteo = MeteoParams(stability = PGStability(:B)))
+    cb= plumeB(1000, 0, 0)
+
+    @test ca < cboth < cb
+end

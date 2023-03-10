@@ -77,20 +77,27 @@ function sensible_heat_flux(hbp::HeatBalanceParams, cloud_cover, T_surf, sol_ele
 end
 
 
-struct BriggsFunctions{T} <: AbstractDispersionFunctions
-    a₁::T
-    b₁::T
-    c₁::T
-    a₂::T
-    b₂::T
-    c₂::T
+struct BriggsFunctions <: AbstractDispersionFunctions
     σ_yx::Function
     σ_zx::Function
-
-    BriggsFunctions(a₁::T, b₁::T, c₁::T, a₂::T, b₂::T, c₂::T) where T = new{T}(a₁, b₁, c₁, a₂, b₂, c₂, _briggs_function(a₁, b₁, c₁), _briggs_function(a₂, b₂, c₂))
 end
 
+BriggsFunctions(a₁::T, b₁::T, c₁::T, a₂::T, b₂::T, c₂::T) where T = BriggsFunctions(_briggs_function(a₁, b₁, c₁), _briggs_function(a₂, b₂, c₂))
+
 BriggsFunctions(t::AbstractTerrain, s::PGStability) = BriggsFunctions(t, s.class)
+BriggsFunctions(t::AbstractTerrain, ss::Vector{PGStability}) = BriggsFunctions(t, [s.class for s in ss])
+
+# This creates a new BriggsFunctions structure, modifying the encapsulated functions to be the mean of the dispersion coefficient values.
+function Statistics.mean(funs::Vector{BriggsFunctions})
+    BriggsFunctions(
+        x -> mean(x .|> sigma_y.(funs)),
+        x -> mean(x .|> sigma_z.(funs)),
+    )
+end
+
+# If several stability classes are given, we consider the mean of the coefficients.
+BriggsFunctions(t::AbstractTerrain, s::Vector{PGStabilityClass}) = mean(BriggsFunctions.(t, s))
+
 BriggsFunctions(::Rural, ::PGVeryUnstable)      = BriggsFunctions(BRIGGS_COEFS[:, 1]..., BRIGGS_COEFS[:, 7]...)
 BriggsFunctions(::Rural, ::PGUnstable)          = BriggsFunctions(BRIGGS_COEFS[:, 2]..., BRIGGS_COEFS[:, 8]...)
 BriggsFunctions(::Rural, ::PGSlightlyUnstable)  = BriggsFunctions(BRIGGS_COEFS[:, 3]..., BRIGGS_COEFS[:, 9]...)

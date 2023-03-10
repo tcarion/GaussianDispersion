@@ -4,6 +4,7 @@ using DocStringExtensions
 using Parameters: @unpack
 using ModelParameters
 using Accessors
+using Statistics
 
 export Terrain, AbstractSkyCondition, pasquill_gifford, PGStability, MeteoParams
 export ReleaseParams, DispersionCoefficients, GaussianPlume

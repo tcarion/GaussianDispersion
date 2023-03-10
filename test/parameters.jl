@@ -6,6 +6,7 @@ using GaussianDispersion: PGStability
 using GaussianDispersion: AbstractDispersionFunctions
 using GaussianDispersion: BriggsFunctions, sigma_y, sigma_z
 using GaussianDispersion: DispersionCoefficients
+using GaussianDispersion.Statistics: mean
 using Test
 
 @testset "Disperions parametrization" begin
@@ -33,12 +34,22 @@ end
 
     syA = sigma_y(briggsA)
     syB = sigma_y(briggsB)
+    szA = sigma_z(briggsA)
+    szB = sigma_z(briggsB)
 
     @test syA(4.) < syB(4.) 
 
     coefs = DispersionCoefficients(briggsA, 4.)
 
-    @test coefs.y == syA(4.) && coefs.z == sigma_z(briggsA)(4.)
+    @test coefs.y == syA(4.) && coefs.z == szA(4.)
+
+    briggsmean = mean([briggsA, briggsB])
+    meansy, meansz = briggsmean(5.)
+    @test meansy == mean([syA(5.), syB(5.)]) && meansz == mean([szA(5.), szB(5.)])
+
+    briggsmean = BriggsFunctions(Rural(), [PGStability(:A), PGStability(:B)])
+
+    @test briggsmean(5.)[1] == mean([BriggsFunctions(Rural(), PGStability(:B))(5.)[1], briggsA(5.)[1]])
 end
 
 @testset "heat balance params" begin
