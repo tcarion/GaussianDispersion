@@ -13,7 +13,7 @@ using Test
     struct Foo <: AbstractDispersionFunctions end
 
     f = Foo()
-    @test f(3.) == (3., 3.)
+    @test_throws ErrorException f(5.)
 end
 
 @testset "Briggs parametrization" begin

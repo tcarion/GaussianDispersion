@@ -38,7 +38,8 @@ Instanciating those types give a functor that takes as argument the downwind dis
 """
 abstract type AbstractDispersionFunctions end
 
-sigma_y(::AbstractDispersionFunctions)::Function = identity
-sigma_z(::AbstractDispersionFunctions)::Function = identity
+_disp_fun_error(o) = error("You have not implemented the `sigma_y` or `sigma_z` functions for the object $(typeof(o))")
+sigma_y(o::AbstractDispersionFunctions)::Function = _disp_fun_error(o)
+sigma_z(o::AbstractDispersionFunctions)::Function = _disp_fun_error(o)
 
 (funs::AbstractDispersionFunctions)(x::Number) = (sigma_y(funs)(x), sigma_z(funs)(x))
