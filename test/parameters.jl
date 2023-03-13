@@ -2,20 +2,55 @@ using GaussianDispersion
 using GaussianDispersion: Rural, Urban
 using GaussianDispersion: HeatBalanceParams, pasquill_gifford
 using GaussianDispersion: Aermod, Calpuff
+using GaussianDispersion: PGStability
+using GaussianDispersion: AbstractDispersionFunctions
+using GaussianDispersion: BriggsFunctions, sigma_y, sigma_z
+using GaussianDispersion: DispersionCoefficients
+using GaussianDispersion.Statistics: mean
 using Test
 
-@testset "dispersion params" begin
-    terrain = Rural()
-    stability = GaussianDispersion.A
+@testset "Disperions parametrization" begin
+    struct Foo <: AbstractDispersionFunctions end
 
-    @test DispersionParams(0., terrain, stability) == DispersionParams(0., 0.)
+    f = Foo()
+    @test_throws ErrorException f(5.)
 end
 
-@test pasquill_gifford(Moderate, 5.5) == Stabilities(:C, :D)
-@test GaussianDispersion.briggs_dispersion(Urban, GaussianDispersion.D) == (
-    (0.16, 0.0004, -0.5),
-    (0.14, 0.0003, -0.5)
-    )
+@testset "Briggs parametrization" begin
+    briggsA = BriggsFunctions(Rural(), PGStability(:A))
+
+    briggsB = BriggsFunctions(Urban(), PGStability(:B))
+    # julia> @btime BriggsFunctions(Rural(), PGStability(:A))(5.)
+    # 544.300 ns (16 allocations: 496 bytes)
+    # (1.09972510308205, 1.0)
+
+    # julia> @btime (0.22 * 5. * (1 + -0.0001*5.)^-0.5, 0.2 * 5. * (1 + 0.0*5.)^1.)
+    # 1.495 ns (0 allocations: 0 bytes)
+    # (1.1002751031679876, 1.0)
+
+    # julia> @btime briggsA(5.)
+    # 204.316 ns (5 allocations: 96 bytes)
+    # (1.09972510308205, 1.0)
+
+    syA = sigma_y(briggsA)
+    syB = sigma_y(briggsB)
+    szA = sigma_z(briggsA)
+    szB = sigma_z(briggsB)
+
+    @test syA(4.) < syB(4.) 
+
+    coefs = DispersionCoefficients(briggsA, 4.)
+
+    @test coefs.y == syA(4.) && coefs.z == szA(4.)
+
+    briggsmean = mean([briggsA, briggsB])
+    meansy, meansz = briggsmean(5.)
+    @test meansy == mean([syA(5.), syB(5.)]) && meansz == mean([szA(5.), szB(5.)])
+
+    briggsmean = BriggsFunctions(Rural(), [PGStability(:A), PGStability(:B)])
+
+    @test briggsmean(5.)[1] == mean([BriggsFunctions(Rural(), PGStability(:B))(5.)[1], briggsA(5.)[1]])
+end
 
 @testset "heat balance params" begin
     @test HeatBalanceParams(Aermod) isa HeatBalanceParams
