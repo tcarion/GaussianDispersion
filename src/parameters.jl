@@ -77,9 +77,9 @@ function sensible_heat_flux(hbp::HeatBalanceParams, cloud_cover, T_surf, sol_ele
 end
 
 
-struct BriggsFunctions <: AbstractDispersionFunctions
-    σ_yx::Function
-    σ_zx::Function
+struct BriggsFunctions{F1<:Function, F2<:Function} <: AbstractDispersionFunctions
+    σ_yx::F1
+    σ_zx::F2
 end
 
 BriggsFunctions(a₁::T, b₁::T, c₁::T, a₂::T, b₂::T, c₂::T) where T = BriggsFunctions(_briggs_function(a₁, b₁, c₁), _briggs_function(a₂, b₂, c₂))
@@ -88,7 +88,7 @@ BriggsFunctions(t::AbstractTerrain, s::PGStability) = BriggsFunctions(t, s.class
 BriggsFunctions(t::AbstractTerrain, ss::Vector{PGStability}) = BriggsFunctions(t, [s.class for s in ss])
 
 # This creates a new BriggsFunctions structure, modifying the encapsulated functions to be the mean of the dispersion coefficient values.
-function Statistics.mean(funs::Vector{BriggsFunctions})
+function Statistics.mean(funs::Vector{<:BriggsFunctions})
     BriggsFunctions(
         x -> mean(x .|> sigma_y.(funs)),
         x -> mean(x .|> sigma_z.(funs)),

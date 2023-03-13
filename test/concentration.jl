@@ -63,19 +63,25 @@ end
     @test ca < cboth < cb
 
     # ! Taking the mean of dispersion functions seems to introduce a huge overhead (x4 computing time !!). I don't know it this is normal...
-    # julia> @btime result = [plumeboth(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)]
+    # julia> @btime result = [plumeboth(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)];
     # 9.694 s (153000005 allocations: 4.27 GiB)
 
     # julia> @btime result = [plumeA(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)];
     # 2.562 s (75000005 allocations: 1.59 GiB)
-
+    
     # ! This is weird since:
     # julia> ps = rand(3)
     # julia> @btime (_briggs_function(ps...)(5.), _briggs_function(ps...)(5.))
     # 445.333 ns (11 allocations: 224 bytes)
     # (2.78303613775333, 2.78303613775333)
-
+    
     # julia> @btime mean([_briggs_function(ps...)(5.), _briggs_function(ps...)(5.)])
     # 549.160 ns (12 allocations: 288 bytes)
     # 2.78303613775333
+    # ? I (partly) fixed this by making BriggsFunctions a parameter type (it also improved the normal computation). Now:
+    # julia> @btime result = [plumeboth(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)];
+    # 1.964 s (60000005 allocations: 1.68 GiB)
+    # julia> @btime result = [plumeA(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)];
+    # 1.353 s (54000005 allocations: 1.23 GiB)
+    # ? I think this could be further improved though.
 end
