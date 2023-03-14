@@ -4,14 +4,16 @@ Structure related to the release conditions
 
     $(FIELDS)
 """
-Base.@kwdef mutable struct ReleaseParams
+Base.@kwdef struct ReleaseParams{T}
     "Effective source height [m]"
     h::Real = 1.
     "Emission rate [g/s]"
     Q::Real = 1.
+    "Gas temperature out of the stack [K]"
+    Ts::T = nothing
 end
 
-Base.@kwdef mutable struct DispersionCoefficients
+Base.@kwdef struct DispersionCoefficients
     "Horizontal dispersion parameter [m]"
     y::Real = 2.15
     "Vertical dispersion parameter [m]"
@@ -19,23 +21,23 @@ Base.@kwdef mutable struct DispersionCoefficients
 end
 
 """
-    DispersionCoefficients(x::Real, terrain::AbstractTerrain, stability::StabilityClass)  
-
-Return a `DispersionCoefficients` struct given the downwind direction `x`, the terrain and stability class
-# Example
-julia> DispersionCoefficients(100, Rural, A)
-DispersionCoefficients(21.89081818461976, 20.0)
-```
+    $(SIGNATURES)
+Buoyancy flux parameter according to Briggs (1968).
 """
-# function DispersionCoefficients(x::Real, terrain::AbstractTerrain, stability::StabilityClass)
-#     ycoef, zcoef = briggs_dispersion(typeof(terrain), stability)
-#     sigma_y = disp_function(ycoef...)(x)
-#     sigma_z = disp_function(zcoef...)(x)
-#     DispersionCoefficients(sigma_y, sigma_z)
-# end
-# Base.:+(d1::DispersionCoefficients, d2::DispersionCoefficients) = DispersionCoefficients(d1.y + d2.y, d1.z + d2.z) 
-# Base.:/(d1::DispersionCoefficients, x::Real) = DispersionCoefficients(d1.y / x, d1.z / x) 
-# Base.:(==)(d1::DispersionCoefficients, d2::DispersionCoefficients) = d1.z == d2.z && d1.y == d2.y
+briggs_buoyancy_flux(gas_density, air_density, stack_radius, gas_velocity) = (1 - gas_density / air_density) * GRAVITY * stack_radius^2 * gas_velocity
+
+"""
+    $(SIGNATURES)
+Plume rise `Δh` [m] according to Briggs (1975) parametrization. `x` is the downwind distance in meter and `u` the downwind velocity in meter/second.
+"""
+function plume_rise(flux_param, x, u) 
+    if flux_param <= 55.
+        xf = 49. * flux_param^(5/8)
+    else
+        xf = 119. * flux_param^(2/5)
+    end
+    1.6 * flux_param^(1/3) * min(x, xf)^(2/3) / u
+end
 
 """
     $(TYPEDEF)

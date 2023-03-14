@@ -15,8 +15,6 @@ using GaussianDispersion: PGSlightlyUnstable, PGNeutral
 using GaussianDispersion: AbstractStability
 using Test
 
-const GD = GaussianDispersion
-
 @testset "Pasquill Gifford stability classes" begin
     pgstab = PGStability(:A)
     @test pgstab isa AbstractStability

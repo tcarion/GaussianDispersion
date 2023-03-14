@@ -1,5 +1,6 @@
 using GaussianDispersion
 using GaussianDispersion.Accessors: @set
+using Test
 # Example from reference book "Air Dispersion Modeling - Foundations and Applications, Alex De Visscher, p.24-25"
 @testset "concentration" begin
     # Example 2.1
@@ -27,6 +28,16 @@ using GaussianDispersion.Accessors: @set
     cground2 = plume(1000, 0, 0)
     @test cground2 ≈ 201.139895390322 * 1e-6
 
+    @testset "with mixing layer" begin
+        # GD.mixing_layer_additional_term(1000, 60)
+        meteopar = MeteoParams(hmix = 100., wind = 2., stability = PGStability(:D))
+        plume_hmix = GaussianPlume(release = relpar, meteo = meteopar)
+        cmix = plume_hmix(1000, 0, 0)
+        # The mixing layer acts like a lid, so the resulting concentration must be higher.
+        @test cmix >= cground2
+        # julia> @btime result = [plume_hmix(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)];
+        # 2.901 s (48000005 allocations: 1.86 GiB)
+    end
     # julia> @btime result = [plume(x,y,z) for x in range(0, 2000, 200), y in range(-300, 300, 100), z in range(0, 150, 150)]
     # 2.912 s (72000005 allocations: 1.54 GiB)
 end
@@ -40,7 +51,7 @@ end
     wₛ = Q / (π*rₛ^2)
     u = 3
 
-    Fb = GaussianDispersion.buoyancy_flux(ρₛ, ρₐ, rₛ, wₛ)
+    Fb = GaussianDispersion.briggs_buoyancy_flux(ρₛ, ρₐ, rₛ, wₛ)
     @test Fb ≈ 12.539 atol=1e-3
     
     Δh = GaussianDispersion.plume_rise(Fb, 1000., u)

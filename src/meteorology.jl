@@ -136,11 +136,14 @@ function pasquill_gifford(criteria::AbstractSkyCondition, windspeed::Real)
         end
     end
 end
-Base.@kwdef struct MeteoParams{W, S, M} <: AbstractMeteoParams
+Base.@kwdef struct MeteoParams{W, S, M, T} <: AbstractMeteoParams
+    "wind at stack height"
     wind::W = 5.
     stability::S = PGStability(:A)
     "height of the mixing layer [m]"
     hmix::M = nothing
+    "temperature of ambient air at stack height [K]"
+    Ta::T = nothing
 end
 
 """
