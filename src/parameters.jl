@@ -39,6 +39,8 @@ function plume_rise(flux_param, x, u)
     1.6 * flux_param^(1/3) * min(x, xf)^(2/3) / u
 end
 
+### Heat Balance parameters
+
 """
     $(TYPEDEF)
 Values for the heat balance parametrization.
@@ -59,7 +61,7 @@ HeatBalanceParams(::Type{Aermod}) = HeatBalanceParams(
 )
 
 HeatBalanceParams(::Type{Calpuff}, terrain::Type{<:AbstractTerrain}) = HeatBalanceParams(;
-    CALPUFF_HEAT_PARAMS[Symbol(terrain)]...
+    CALPUFF_HEAT_PARAMS[_to_symb(terrain)]...
 )
 
 # p.78
@@ -77,6 +79,28 @@ function sensible_heat_flux(hbp::HeatBalanceParams, cloud_cover, T_surf, sol_ele
     net_rad = net_radiation(R, albedo, cloud_cover, T_surf)
     sensible_heat_flux(C_g, net_rad, B)
 end
+
+### Wind speed profiles
+
+
+# 5.7.2 Table 5.4
+CALPUFF_ROUGHNESS_LENGTH = (
+    Mountains = 30, # 5-70, Rocky Mountains: 50:70
+    Urban = 1, # 0.5:1.0 (suburbs), 2:3 (city center)
+    Rural = 0.1, # 0.05:0.25
+    Farmland = 0.05, # 0.03:0.1
+    Prairie = 0.01, # 0.005:0.03, cut grass 0.005-0.01
+    Irrigated = 0.25, # 0.005:0.03
+    # TODO inconsistent with range
+    Water = 0.001, # 0.00001:0.0001, open sea: 0.0001-0.001
+    Forest = 1, # 0.5:1
+    Ice = 1e-5,
+    Lawn = 0.01
+)
+
+roughness_length(::Type{Calpuff}, terrain::Type{<:AbstractTerrain}) = CALPUFF_ROUGHNESS_LENGTH[_to_symb(terrain)]
+
+_to_symb(param::Type{<:AbstractTerrain}) = Symbol(param)
 
 
 struct BriggsFunctions{F1<:Function, F2<:Function} <: AbstractDispersionFunctions

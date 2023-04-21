@@ -11,7 +11,13 @@ struct Urban <: AbstractTerrain end
 struct Rural <: AbstractTerrain end
 struct Irrigated <: AbstractTerrain end
 struct Water <: AbstractTerrain end
+struct Snow <: AbstractTerrain end
+struct Ice <: AbstractTerrain end
 struct Forest <: AbstractTerrain end
+struct Mountains <: AbstractTerrain end
+struct Farmland <: AbstractTerrain end
+struct Prairie <: AbstractTerrain end
+struct Lawn <: AbstractTerrain end
 
 Base.broadcastable(t::AbstractTerrain) = Ref(t)
 

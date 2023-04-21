@@ -8,12 +8,14 @@ using GaussianDispersion:
     obukhov,
     solar_energy_flux,
     net_radiation,
-    sensible_heat_flux
-
+    sensible_heat_flux,
+    log_wind_profile,
+    log_wind_profile_neutral
 using GaussianDispersion: PGStabilityClass, PGStability
 using GaussianDispersion: PGSlightlyUnstable, PGNeutral
 using GaussianDispersion: AbstractStability
 using Test
+using Roots
 
 @testset "Pasquill Gifford stability classes" begin
     pgstab = PGStability(:A)
@@ -81,4 +83,27 @@ end
     elev = GD.solar_elevation(lat, δ, ha)
     @test elev ≈ 37.73 atol = 1e-2
     @test GD.albedo_elevation(0.1, 30) ≈ 0.129 atol = 1e-2
+end
+
+@testset "wind speed profile" begin
+    z₀ = 0.1
+
+    # Neutral condition - ex 5.5
+    z_m = 10.
+    u_m = 7.
+    u_star = friction_velocity(u_m, z_m, z₀)
+    @test u_star ≈ 0.608 atol=1e-3
+    u_90 = log_wind_profile_neutral(u_star, 90., z₀) 
+    @test u_90 ≈ 10.3 atol=1e-1
+
+    # Non-Neutral conditions - ex 5.6
+    p = 101e3
+    T = 300.
+    z₀ = 0.5
+    q = 200
+    u_10 = 5.
+    f(u_star) = u_10 - log_wind_profile(u_star, 10., z₀, obukhov(p, T, u_star, q))
+    flog(u_star) = log_wind_profile(u_star, 10., z₀, obukhov(p, T, u_star, q))
+    u_star = find_zero(f, 0.5)
+    @test u_star ≈ 0.711 atol=1e-3
 end

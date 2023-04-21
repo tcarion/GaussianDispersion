@@ -7,6 +7,7 @@ using GaussianDispersion: AbstractDispersionFunctions
 using GaussianDispersion: BriggsFunctions, sigma_y, sigma_z
 using GaussianDispersion: DispersionCoefficients
 using GaussianDispersion.Statistics: mean
+using GaussianDispersion: roughness_length
 using Test
 
 @testset "Disperions parametrization" begin
@@ -57,4 +58,9 @@ end
     @test HeatBalanceParams(C_g = 0.3) isa HeatBalanceParams
 
     @test HeatBalanceParams(Calpuff, Urban).albedo == 0.18
+end
+
+@testset "roughness length" begin
+    z₀ = roughness_length(Calpuff, Rural)
+    @test z₀ == 0.1
 end

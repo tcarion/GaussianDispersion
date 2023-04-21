@@ -159,11 +159,27 @@ Calculate Obukhov scale height from surface meteorological data and sensible hea
 - u_star: scale velocity [m/s]                   
 - q:       surface sensible heat flux [W/m2]      
 """
-function obukhov(ps, ts, td, t, p, u_star, q, c_p = 1004.5, R_gas = 287.05, karman = 0.4, g = 9.81)
+function obukhov(ps, ts, td, t, p, u_star, q; c_p = 1004.5, R_gas = 287.05, karman = 0.4, g = 9.81)
     e = saturation_pressure(td)
     tv = virtual_temp(ps, t, e)
     rho = p / (R_gas * tv)
     θ = potential_temp(t, p, c_p, R_gas)
+    θ_star = friction_temp(q, rho, u_star, c_p)
+    u_star^2 * ts / (karman * g * θ_star)
+end
+
+"""
+    $(TYPEDSIGNATURES)
+
+Calculate Obukhov scale height from surface meteorological data and sensible heat flux.
+# Arguments                                           
+- ps:      surface pressure [Pa]                  
+- ts:      surface temperature [K]                
+- u_star:  scale velocity [m/s]                   
+- q:       surface sensible heat flux [W/m2]      
+"""
+function obukhov(ps, ts, u_star, q; c_p = 1004.5, R_gas = 287.05, karman = 0.4, g = 9.81)
+    rho = ps / (R_gas * ts)
     θ_star = friction_temp(q, rho, u_star, c_p)
     u_star^2 * ts / (karman * g * θ_star)
 end
@@ -237,6 +253,44 @@ function friction_velocity(p, t, td, stress, R_gas)
     sqrt(abs(stress) / rho_moist)
 end
 
+"""
+    $(TYPEDSIGNATURES)
+
+Calculate the friction velocity from a velocity `u_m` measured at `z_m` on a surface of roughness length `z_0`.
+"""
+friction_velocity(u_m, z_m, z_0; karman = 0.4) = karman * u_m / log(z_m / z_0)
+
+_log_wind_profile(u_star, z, z_0, f; karman = 0.4) = u_star / karman * (log(z / z_0) + f)
+
+log_wind_profile_neutral(u_star, z, z_0; karman = 0.4) = _log_wind_profile(u_star, z, z_0, 0.; karman)
+
+function log_wind_profile_stable(u_star, z, z_0, L; karman = 0.4) 
+    f = 5 * (z - z_0) / L
+    _log_wind_profile(u_star, z, z_0, f; karman)
+end
+
+function log_wind_profile_unstable(u_star, z, z_0, L; karman = 0.4) 
+    n_0 = (1. - 16. * z_0 / L)^(1/4)
+    n = (1. - 16. * z / L)^(1/4)
+    f = log( (n_0*n_0 + 1.) * (n_0 + 1.)^2 / ( (n*n + 1.) * (n + 1.)^2 ) ) + 2 * ( atan(n) - atan(n_0) )
+    _log_wind_profile(u_star, z, z_0, f; karman)
+end
+
+"""
+    $(TYPEDSIGNATURES)
+
+Calculate the log wind velocity profile.
+# Arguments                                           
+- u_star:   friction velocity [m/s]                  
+- z:        height [m]
+- z_0:      roughness length [m]
+- L:        Obukhov length [m]
+"""
+function log_wind_profile(u_star, z, z_0, L; karman = 0.4)
+    L > 0 ? 
+        log_wind_profile_stable(u_star, z, z_0, L; karman) : 
+        log_wind_profile_unstable(u_star, z, z_0, L; karman)
+end
 """
     $(TYPEDSIGNATURES)
 

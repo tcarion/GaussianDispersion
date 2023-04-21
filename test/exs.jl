@@ -49,3 +49,15 @@ plot!(tplot, [T0, Tend], [zs[1], zs[end]], linestyle = :dash, color = :red)
 # 5.3 p.69
 Θ = potential_temp.(t_rw, p_rw, R, 1006)
 plot(Θ, zs, marker = :dot)
+
+# 5.9 p.106
+wind_turb = readdlm("test/files/wind_turb.txt", ',')
+t = wind_turb[:, 1]
+u = wind_turb[:, 2]
+ū = sum(u) / length(u)
+
+σᵤ² = sum((u .- ū).^2) / length(u)
+
+σᵤ = sqrt(σᵤ²)
+
+iᵤ = σᵤ / ū
