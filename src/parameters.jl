@@ -24,19 +24,33 @@ end
     $(SIGNATURES)
 Buoyancy flux parameter according to Briggs (1968).
 """
-briggs_buoyancy_flux(gas_density, air_density, stack_radius, gas_velocity) = (1 - gas_density / air_density) * GRAVITY * stack_radius^2 * gas_velocity
+buoyancy_flux_param(gas_density, air_density, stack_radius, gas_velocity) = (1 - gas_density / air_density) * GRAVITY * stack_radius^2 * gas_velocity
 
 """
     $(SIGNATURES)
-Plume rise `Δh` [m] according to Briggs (1975) parametrization. `x` is the downwind distance in meter and `u` the downwind velocity in meter/second.
+Momentum flux parameter according to Briggs (1968).
 """
-function plume_rise(flux_param, x, u) 
+momentum_flux_param(gas_density, air_density, stack_radius, gas_velocity) = gas_density / air_density * stack_radius^2 * gas_velocity^2
+
+"""
+    $(SIGNATURES)
+Plume rise `Δh` [m] according to Briggs (1975) parametrization for buoyancy dominated plumes. `x` is the downwind distance in meter and `u` the downwind velocity in meter/second.
+"""
+function buoyancy_plume_rise(flux_param, x, u) 
     if flux_param <= 55.
         xf = 49. * flux_param^(5/8)
     else
         xf = 119. * flux_param^(2/5)
     end
     1.6 * flux_param^(1/3) * min(x, xf)^(2/3) / u
+end
+
+"""
+    $(SIGNATURES)
+Plume rise `Δh` [m] according to Briggs (1975) parametrization for momentum dominated plumes. `x` is the downwind distance in meter and `u` the downwind velocity in meter/second.
+"""
+function momentum_plume_rise(flux_param, x, u) 
+    2.0 * (flux_param * x / u^2)^(1/3)
 end
 
 ### Heat Balance parameters

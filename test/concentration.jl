@@ -51,10 +51,10 @@ end
     wₛ = Q / (π*rₛ^2)
     u = 3
 
-    Fb = GaussianDispersion.briggs_buoyancy_flux(ρₛ, ρₐ, rₛ, wₛ)
+    Fb = GaussianDispersion.buoyancy_flux_param(ρₛ, ρₐ, rₛ, wₛ)
     @test Fb ≈ 12.539 atol=1e-3
     
-    Δh = GaussianDispersion.plume_rise(Fb, 1000., u)
+    Δh = GaussianDispersion.buoyancy_plume_rise(Fb, 1000., u)
     @test Δh ≈ 47.589 atol=1e-3
 end
 
